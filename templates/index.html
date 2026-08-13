@@ -1,0 +1,1109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>APK Builder – Unity & StartApp Ads</title>
+<style>
+:root{
+  --bg:#0a0c12;--s1:#12151f;--s2:#1a1e2e;--s3:#222840;
+  --border:#2d3452;--accent:#6366f1;--a2:#8b5cf6;--a3:#06b6d4;
+  --green:#22c55e;--red:#ef4444;--yellow:#f59e0b;--orange:#f97316;
+  --text:#eef0ff;--muted:#7880a4;--r:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{min-height:100vh;}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;}
+
+/* ── WELCOME SCREEN ── */
+#welcome{min-height:100vh;display:flex;flex-direction:column;align-items:center;
+         justify-content:center;padding:24px;background:
+         radial-gradient(ellipse at 20% 20%,rgba(99,102,241,.15) 0%,transparent 60%),
+         radial-gradient(ellipse at 80% 80%,rgba(139,92,246,.1) 0%,transparent 60%),
+         var(--bg);}
+.w-logo{font-size:3rem;font-weight:900;background:linear-gradient(135deg,var(--accent),#a78bfa,var(--a3));
+        -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+        letter-spacing:-2px;margin-bottom:8px;}
+.w-sub{color:var(--muted);font-size:.9rem;margin-bottom:48px;text-align:center;}
+.w-label{font-size:.7rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+         color:var(--muted);margin-bottom:16px;text-align:center;}
+.network-cards{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;max-width:640px;}
+.net-card{flex:1;min-width:200px;max-width:280px;background:var(--s1);border:2px solid var(--border);
+          border-radius:16px;padding:28px 22px;cursor:pointer;transition:all .25s;text-align:center;
+          position:relative;overflow:hidden;}
+.net-card:hover{transform:translateY(-4px);box-shadow:0 20px 40px rgba(0,0,0,.4);}
+.net-card.unity:hover{border-color:var(--accent);box-shadow:0 20px 40px rgba(99,102,241,.2);}
+.net-card.startapp:hover{border-color:var(--orange);box-shadow:0 20px 40px rgba(249,115,22,.2);}
+.net-icon{font-size:3rem;margin-bottom:14px;}
+.net-name{font-size:1.3rem;font-weight:800;margin-bottom:6px;}
+.net-desc{font-size:.78rem;color:var(--muted);line-height:1.5;}
+.net-badge{display:inline-block;padding:3px 10px;border-radius:99px;font-size:.68rem;
+           font-weight:700;margin-top:10px;}
+.badge-blue{background:rgba(99,102,241,.15);color:var(--accent);}
+.badge-orange{background:rgba(249,115,22,.15);color:var(--orange);}
+.net-features{margin-top:14px;text-align:left;}
+.net-features li{font-size:.75rem;color:var(--muted);padding:3px 0;list-style:none;
+                  display:flex;align-items:center;gap:6px;}
+.net-features li::before{content:'✓';color:var(--green);font-weight:700;flex-shrink:0;}
+
+/* ── MAIN APP ── */
+#mainApp{display:none;min-height:100vh;flex-direction:column;align-items:center;padding:20px 14px 40px;}
+
+.topbar{max-width:720px;width:100%;display:flex;align-items:center;gap:12px;margin-bottom:20px;}
+.back-btn{background:var(--s2);border:1px solid var(--border);color:var(--muted);
+          border-radius:8px;padding:7px 14px;font-size:.8rem;cursor:pointer;transition:all .2s;flex-shrink:0;}
+.back-btn:hover{color:var(--text);border-color:var(--accent);}
+.topbar-title{font-size:1rem;font-weight:700;}
+.net-pill{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:99px;
+          font-size:.78rem;font-weight:700;}
+.pill-unity{background:rgba(99,102,241,.15);border:1px solid rgba(99,102,241,.3);color:#a5b4fc;}
+.pill-startapp{background:rgba(249,115,22,.15);border:1px solid rgba(249,115,22,.3);color:#fdba74;}
+
+.main-tabs{display:flex;gap:0;background:var(--s2);border-radius:10px;padding:4px;
+           max-width:720px;width:100%;margin-bottom:18px;}
+.main-tab{flex:1;padding:10px;border:none;border-radius:8px;background:transparent;
+          color:var(--muted);font-size:.88rem;font-weight:700;cursor:pointer;transition:all .2s;}
+.main-tab.active{background:linear-gradient(135deg,var(--accent),var(--a2));color:#fff;}
+
+.section{display:none;max-width:720px;width:100%;}
+.section.show{display:block;}
+
+.card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);
+      padding:22px;margin-bottom:14px;}
+.ct{font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--accent);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.ct::after{content:'';flex:1;height:1px;background:var(--border);}
+.ct-orange{color:var(--orange);}
+.ct-cyan{color:var(--a3);}
+
+.field{margin-bottom:13px;}
+label{display:block;font-size:.78rem;color:var(--muted);margin-bottom:5px;font-weight:500;}
+input,textarea,select{width:100%;background:var(--s2);border:1.5px solid var(--border);
+  border-radius:8px;color:var(--text);font-size:.88rem;padding:9px 12px;
+  outline:none;transition:border-color .2s;font-family:inherit;}
+input:focus,textarea:focus,select:focus{border-color:var(--accent);}
+input.valid{border-color:var(--green);}
+input.invalid{border-color:var(--red);}
+textarea{min-height:100px;resize:vertical;line-height:1.5;}
+select option{background:var(--s2);}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:13px;}
+@media(max-width:500px){.grid2{grid-template-columns:1fr;}}
+
+.toggle-row{display:flex;align-items:center;justify-content:space-between;
+            padding:11px 0;border-bottom:1px solid var(--border);}
+.toggle-row:last-child{border-bottom:none;}
+.tl{font-size:.85rem;font-weight:600;}
+.ts{font-size:.72rem;color:var(--muted);margin-top:2px;}
+.switch{position:relative;width:44px;height:24px;flex-shrink:0;margin-left:12px;}
+.switch input{opacity:0;width:0;height:0;}
+.slider{position:absolute;cursor:pointer;inset:0;background:var(--border);border-radius:24px;transition:.3s;}
+.slider:before{content:'';position:absolute;width:18px;height:18px;left:3px;bottom:3px;
+               background:#fff;border-radius:50%;transition:.3s;}
+input:checked+.slider{background:var(--accent);}
+input:checked+.slider:before{transform:translateX(20px);}
+
+.ad-types{display:flex;gap:10px;flex-wrap:wrap;}
+.ad-check{flex:1;min-width:80px;background:var(--s2);border:1.5px solid var(--border);border-radius:10px;
+          padding:11px;cursor:pointer;transition:all .2s;display:flex;align-items:center;
+          gap:9px;user-select:none;}
+.ad-check input{display:none;}
+.dot{width:17px;height:17px;border-radius:50%;border:2px solid var(--border);
+     transition:all .2s;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.ad-check.on{border-color:var(--accent);background:rgba(99,102,241,.07);}
+.ad-check.on .dot{border-color:var(--accent);background:var(--accent);}
+.ad-check.on .dot::after{content:'';width:5px;height:5px;border-radius:50%;background:#fff;display:block;}
+.al{font-size:.83rem;font-weight:600;}
+.as{font-size:.69rem;color:var(--muted);}
+
+.tabs{display:flex;background:var(--s2);border-radius:8px;padding:3px;margin-bottom:11px;}
+.tab-btn{flex:1;padding:7px;border:none;border-radius:6px;background:transparent;
+         color:var(--muted);font-size:.82rem;font-weight:600;cursor:pointer;transition:all .2s;}
+.tab-btn.active{background:var(--accent);color:#fff;}
+
+.btn-primary{width:100%;padding:13px;border:none;border-radius:10px;
+             background:linear-gradient(135deg,var(--accent),var(--a2));
+             color:#fff;font-size:.95rem;font-weight:700;cursor:pointer;transition:opacity .2s;}
+.btn-primary:hover{opacity:.88;}
+.btn-primary:disabled{opacity:.4;cursor:not-allowed;}
+.btn-orange{background:linear-gradient(135deg,var(--orange),#dc2626);}
+
+.prog-wrap{background:var(--s2);border-radius:99px;height:5px;overflow:hidden;margin:12px 0;}
+.prog-bar{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--accent),#a78bfa);
+          width:0%;transition:width .5s;}
+.prog-label{font-size:.79rem;color:var(--muted);text-align:center;}
+
+.result-box{border-radius:12px;padding:16px;display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-top:14px;}
+.result-box.ok{background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.25);}
+.result-box.err{background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.22);}
+.result-box.warn{background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.22);}
+.ri{font-size:1.5rem;}
+.rt{flex:1;min-width:0;}
+.rtt{font-weight:700;font-size:.92rem;margin-bottom:4px;}
+.rts{font-size:.78rem;color:var(--muted);line-height:1.5;}
+.btns-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+.btn-sm{padding:8px 16px;border:none;border-radius:7px;font-weight:700;font-size:.78rem;
+        cursor:pointer;text-decoration:none;display:inline-block;transition:opacity .2s;color:#fff;}
+.btn-sm:hover{opacity:.83;}
+
+.code-block{background:#080a10;border:1px solid var(--border);border-radius:8px;
+            padding:14px;font-family:'Cascadia Code',Consolas,monospace;font-size:.74rem;
+            line-height:1.7;overflow-x:auto;white-space:pre-wrap;word-break:break-all;
+            color:#a8b8d8;margin-top:10px;position:relative;}
+.copy-btn{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;
+          background:var(--s2);border:1px solid var(--border);border-radius:6px;
+          color:var(--muted);font-size:.72rem;cursor:pointer;transition:all .2s;margin-top:6px;}
+.copy-btn:hover{border-color:var(--accent);color:var(--accent);}
+
+.info{background:rgba(99,102,241,.05);border:1px solid rgba(99,102,241,.18);
+      border-radius:8px;padding:10px 13px;font-size:.76rem;color:var(--muted);
+      line-height:1.6;margin-top:9px;}
+.info strong{color:var(--text);}
+code{background:var(--s2);padding:1px 5px;border-radius:4px;font-size:.74rem;color:#a78bfa;}
+
+.tracker{display:flex;gap:0;align-items:center;margin-top:14px;}
+.tracker-step{flex:1;text-align:center;position:relative;}
+.tracker-step::after{content:'';position:absolute;top:14px;left:50%;width:100%;height:2px;
+                      background:var(--border);z-index:0;}
+.tracker-step:last-child::after{display:none;}
+.t-dot{width:28px;height:28px;border-radius:50%;background:var(--s2);border:2px solid var(--border);
+       display:flex;align-items:center;justify-content:center;font-size:.7rem;
+       margin:0 auto 4px;position:relative;z-index:1;transition:all .4s;}
+.t-dot.done{background:var(--green);border-color:var(--green);}
+.t-dot.active{background:var(--accent);border-color:var(--accent);animation:pulse 1.2s infinite;}
+.t-dot.fail{background:var(--red);border-color:var(--red);}
+.t-label{font-size:.62rem;color:var(--muted);}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(99,102,241,.4);}50%{box-shadow:0 0 0 6px rgba(99,102,241,0);}}
+
+.divider{height:1px;background:var(--border);margin:6px 0;}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════
+     WELCOME / NETWORK SELECTOR SCREEN
+     ══════════════════════════════════════════════ -->
+<div id="welcome">
+  <div class="w-logo">⚡ APK Builder</div>
+  <div class="w-sub">WebView Android App + Ads SDK<br/>Form bharo → GitHub → APK phone pe download</div>
+
+  <div class="w-label">Pehle apna Ad Network chuno</div>
+
+  <div class="network-cards">
+    <div class="net-card unity" onclick="selectNetwork('unity')">
+      <div class="net-icon">🎮</div>
+      <div class="net-name">Unity Ads</div>
+      <div class="net-desc">Game developers ke liye best. Rewarded + Interstitial ads. High eCPM.</div>
+      <div class="net-badge badge-blue">Unity Game ID</div>
+      <ul class="net-features">
+        <li>Rewarded Video Ads</li>
+        <li>Interstitial Ads</li>
+        <li>Auto-show on app open</li>
+        <li>Custom HTML button trigger</li>
+      </ul>
+    </div>
+
+    <div class="net-card startapp" onclick="selectNetwork('startapp')">
+      <div class="net-icon">🚀</div>
+      <div class="net-name">Start.io Ads</div>
+      <div class="net-desc">StartApp — easy setup, rewarded video + interstitial + banner ads. Global coverage.</div>
+      <div class="net-badge badge-orange">StartApp App ID</div>
+      <ul class="net-features">
+        <li>Banner Ads</li>
+        <li>Interstitial Ads</li>
+        <li>Auto-show on open</li>
+        <li>Custom HTML button trigger</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     MAIN APP
+     ══════════════════════════════════════════════ -->
+<div id="mainApp">
+
+  <div class="topbar">
+    <button class="back-btn" onclick="goBack()">← Wapas</button>
+    <div class="topbar-title">APK Builder</div>
+    <div class="net-pill" id="netPill"></div>
+  </div>
+
+  <div class="main-tabs">
+    <button class="main-tab active" onclick="mainTab('builder')">📱 APK Builder</button>
+    <button class="main-tab" onclick="mainTab('api')">🔌 Custom Ad API</button>
+  </div>
+
+  <!-- ── BUILDER SECTION ── -->
+  <div class="section show" id="sec-builder">
+
+    <!-- App Details -->
+    <div class="card">
+      <div class="ct">📱 App Details</div>
+      <div class="grid2">
+        <div class="field"><label>App Name *</label>
+          <input type="text" id="appName" placeholder="My Cool App"/></div>
+        <div class="field">
+          <label>Package Name * <span id="pkgStatus" style="font-size:.7rem;margin-left:4px"></span></label>
+          <input type="text" id="pkgName" placeholder="com.company.myapp"
+                 oninput="checkPkg(this)"/></div>
+      </div>
+      <div class="field">
+        <label id="adIdLabel">Ad Network ID *</label>
+        <input type="text" id="adId" placeholder="Unity Game ID ya StartApp App ID"/>
+        <div class="info" id="adIdHint" style="margin-top:6px"></div>
+      </div>
+      <div class="field">
+        <label>App Icon URL (optional)</label>
+        <input type="url" id="iconUrl" placeholder="https://yourwebsite.com/logo.png"/>
+        <div class="info" style="margin-top:6px">
+          Chhod do to — website URL wale app mein uski <code>favicon.ico</code> khud utha li jaayegi.
+          Direct image link do (png/jpg), <code>.ico</code> bhi chalega.
+        </div>
+      </div>
+    </div>
+
+    <!-- Ad Types -->
+    <div class="card">
+      <div class="ct" id="adTypesCt">💰 Ad Types</div>
+      <div class="ad-types" id="adTypesRow"></div>
+
+      <div style="background:var(--s2);border-radius:10px;padding:14px;margin-top:14px;">
+        <div style="font-size:.68rem;color:var(--accent);font-weight:700;letter-spacing:.1em;
+                    text-transform:uppercase;margin-bottom:10px;">⚡ Advanced Options</div>
+        <div class="toggle-row">
+          <div>
+            <div class="tl">🚀 Auto Show — App Open hote hi</div>
+            <div class="ts">SDK ready → Ad automatically pehli baar dikhega</div>
+          </div>
+          <label class="switch"><input type="checkbox" id="autoShow"/><span class="slider"></span></label>
+        </div>
+        <div class="toggle-row" id="testModeRow">
+          <div>
+            <div class="tl">🧪 Test Mode</div>
+            <div class="ts">Fake/guaranteed test ads — testing ke liye (rewarded "no fill" fix). Release se pehle OFF karo</div>
+          </div>
+          <label class="switch"><input type="checkbox" id="testMode"/><span class="slider"></span></label>
+        </div>
+        <div class="field" id="startAppPlacement" style="display:none;margin-top:12px;">
+          <label>Rewarded Placement Name (optional)</label>
+          <input type="text" id="rewardedPlacement" placeholder="Leave empty for default"/>
+          <div class="info" style="margin-top:6px;">StartApp dashboard me rewarded placement name set kiya ho to yahan daalein.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="card">
+      <div class="ct">🌐 App Content</div>
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('url')">🔗 Website URL</button>
+        <button class="tab-btn" onclick="switchTab('html')">💻 Custom HTML</button>
+        <button class="tab-btn" onclick="switchTab('zip')">📦 Upload ZIP</button>
+      </div>
+      <div id="urlTab" class="field">
+        <label>Website URL *</label>
+        <input type="url" id="urlInput" placeholder="https://yourwebsite.com"/>
+        <div class="info"><strong>Koi bhi website</strong> — app us site ko WebView mein open karega.</div>
+      </div>
+      <div id="htmlTab" class="field" style="display:none">
+        <label>HTML Code *</label>
+        <textarea id="htmlInput" placeholder="<!DOCTYPE html>&#10;<html><body>&#10;  <h1>Meri App</h1>&#10;  <!-- Ad buttons niche copy karke yahan paste karo -->&#10;</body></html>"></textarea>
+        <div class="info">
+          <strong>Tip:</strong> Build ke baad niche "Ad Button Code" milega — use apni HTML mein paste karo.<br/>
+          <strong>App ke button add mat karo</strong> — sirf apni HTML ka button use karo.
+        </div>
+      </div>
+      <div id="zipTab" class="field" style="display:none">
+        <div class="field">
+          <label>ZIP file (HTML/JS/CSS)</label>
+          <input type="file" id="zipFile" accept=".zip" onchange="handleZip(this)"/>
+          <div class="info">Select a ZIP containing your website files. The app will load <code>index.html</code> by default.</div>
+        </div>
+        <div class="field">
+          <label>Entry file (optional)</label>
+          <input type="text" id="entryFile" placeholder="index.html" value="index.html"/>
+        </div>
+      </div>
+    </div>
+
+    <!-- Permissions with Search -->
+    <div class="card">
+      <div class="ct">🔐 Permissions (tick jo chahiye)</div>
+      <div class="field">
+        <label>🔍 Search permissions</label>
+        <input type="text" id="permSearch" placeholder="Type to filter..." oninput="filterPermissions()"/>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;max-height:220px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;padding:8px;">
+        <div id="permissionsContainer"></div>
+      </div>
+      <div class="field" style="margin-top:10px;">
+        <label>Custom permissions (comma separated) – if not in list, add manually</label>
+        <input type="text" id="customPerms" placeholder="android.permission.CAMERA, android.permission.READ_EXTERNAL_STORAGE"/>
+        <div class="info">Write full permission names separated by commas. These will be added to manifest.</div>
+      </div>
+    </div>
+
+    <!-- Build Button -->
+    <div class="card">
+      <button class="btn-primary" id="buildBtn" onclick="startBuild()">⚡ Build APK — GitHub pe Push Karo</button>
+      <div id="buildProgress" style="display:none;margin-top:12px">
+        <div class="prog-wrap"><div class="prog-bar" id="bProg"></div></div>
+        <div class="prog-label" id="bLabel">Starting...</div>
+      </div>
+      <div id="buildResult"></div>
+    </div>
+  </div>
+
+  <!-- ── CUSTOM API SECTION ── -->
+  <div class="section" id="sec-api">
+    <div class="card">
+      <div class="ct ct-cyan">🔌 Custom Ad API Generator</div>
+      <div class="info" style="margin-bottom:14px;font-size:.8rem">
+        <strong>Kaise kaam karta hai:</strong><br/>
+        1. Apna Ad Network ID dalo<br/>
+        2. <strong>Generate API</strong> click karo → unique key + code milega<br/>
+        3. Code apni HTML mein paste karo — kisi bhi button pe laga do<br/>
+        4. Button click → API call → Ad <strong>turant</strong> show hoga! ⚡
+      </div>
+
+      <div class="grid2">
+        <div class="field">
+          <label id="apiIdLabel">Ad Network ID *</label>
+          <input type="text" id="apiGameId" placeholder="Unity Game ID / StartApp ID"/>
+        </div>
+        <div class="field">
+          <label>Ad Types</label>
+          <div class="ad-types" style="height:42px;align-items:center">
+            <label class="ad-check on" id="apiChkR" style="padding:7px 10px">
+              <input type="checkbox" value="rewarded" checked/>
+              <div class="dot"></div>
+              <div><div class="al">🎁 Rewarded</div></div>
+            </label>
+            <label class="ad-check on" id="apiChkI" style="padding:7px 10px">
+              <input type="checkbox" value="interstitial" checked/>
+              <div class="dot"></div>
+              <div><div class="al">📺 Interstitial</div></div>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn-primary" id="genBtn" onclick="generateAPI()">🔑 Generate API Key + Code</button>
+      <div id="apiResult"></div>
+    </div>
+
+    <div class="card">
+      <div class="ct ct-cyan">📖 Kaise use karo</div>
+      <div class="info" style="font-size:.8rem">
+        <strong>Method 1 — JS Function (recommended):</strong><br/>
+        Script tag copy karo → HTML ke <code>&lt;head&gt;</code> ya <code>&lt;body&gt;</code> mein paste karo<br/>
+        Phir kisi bhi button pe: <code>onclick="showAd('rewarded')"</code><br/><br/>
+        <strong>Method 2 — URL Bridge (no JS needed):</strong><br/>
+        <code>&lt;a href="ads://show_rewarded"&gt;</code> — sirf ye link kaafi hai!<br/>
+        <code>&lt;a href="ads://show_interstitial"&gt;</code><br/><br/>
+        <strong>⚡ Dono methods instant hain</strong> — ad pehle se loaded rehta hai, click par 0ms delay.
+      </div>
+    </div>
+  </div>
+
+</div><!-- /mainApp -->
+
+<script>
+// ── State ─────────────────────────────────────────────────────────────────
+let selectedNetwork = 'unity';
+let activeTab = 'url';
+let buildCommitSha = null;
+let pollInterval = null;
+let zipBase64 = '';
+
+// ── Welcome / Network select ──────────────────────────────────────────────
+function selectNetwork(net) {
+  selectedNetwork = net;
+  document.getElementById('welcome').style.display = 'none';
+  const ma = document.getElementById('mainApp');
+  ma.style.display = 'flex';
+
+  const pill = document.getElementById('netPill');
+  if (net === 'unity') {
+    pill.className = 'net-pill pill-unity';
+    pill.textContent = '🎮 Unity Ads';
+  } else {
+    pill.className = 'net-pill pill-startapp';
+    pill.textContent = '🚀 Start.io Ads';
+  }
+
+  if (net === 'unity') {
+    document.getElementById('adIdLabel').textContent = 'Unity Game ID *';
+    document.getElementById('adId').placeholder = '1234567';
+    document.getElementById('adIdHint').innerHTML =
+      '<strong>Unity Dashboard</strong> → Monetize → Unity Ads Setup → Game ID copy karo';
+    document.getElementById('apiIdLabel').textContent = 'Unity Game ID *';
+    document.getElementById('apiGameId').placeholder = '1234567';
+    document.getElementById('testModeRow').style.display = '';
+    document.getElementById('startAppPlacement').style.display = 'none';
+    buildAdTypes(['rewarded','interstitial']);
+  } else {
+    document.getElementById('adIdLabel').textContent = 'StartApp App ID *';
+    document.getElementById('adId').placeholder = 'e.g. 200000000';
+    document.getElementById('adIdHint').innerHTML =
+      '<strong>StartApp Dashboard</strong> → Apps → App ID copy karo (numbers)';
+    document.getElementById('apiIdLabel').textContent = 'StartApp App ID *';
+    document.getElementById('apiGameId').placeholder = '200000000';
+    document.getElementById('testModeRow').style.display = '';
+    document.getElementById('startAppPlacement').style.display = 'block';
+    buildAdTypes(['rewarded','interstitial','banner']);
+  }
+  document.getElementById('adTypesCt').className = net === 'unity' ? 'ct' : 'ct ct-orange';
+}
+
+function buildAdTypes(types) {
+  const map = {
+    rewarded:     {icon:'🎁', label:'Rewarded',     sub:'User dekhe → reward'},
+    interstitial: {icon:'📺', label:'Interstitial',  sub:'Full screen'},
+    banner:       {icon:'📰', label:'Banner',        sub:'Top/bottom banner'},
+  };
+  const row = document.getElementById('adTypesRow');
+  row.innerHTML = '';
+  types.forEach(t => {
+    const m = map[t];
+    const el = document.createElement('label');
+    el.className = 'ad-check on';
+    el.id = 'chk_' + t;
+    el.innerHTML = `<input type="checkbox" value="${t}" checked/><div class="dot"></div>
+      <div><div class="al">${m.icon} ${m.label}</div><div class="as">${m.sub}</div></div>`;
+    el.addEventListener('click', () => {
+      const inp = el.querySelector('input');
+      inp.checked = !inp.checked;
+      el.classList.toggle('on', inp.checked);
+    });
+    row.appendChild(el);
+  });
+}
+
+function goBack() {
+  document.getElementById('mainApp').style.display = 'none';
+  document.getElementById('welcome').style.display = 'flex';
+  clearInterval(pollInterval);
+}
+
+// ── Tabs ─────────────────────────────────────────────────────────────────
+function mainTab(t) {
+  document.querySelectorAll('.main-tab').forEach((b,i)=>
+    b.classList.toggle('active',(i===0&&t==='builder')||(i===1&&t==='api')));
+  document.getElementById('sec-builder').classList.toggle('show',t==='builder');
+  document.getElementById('sec-api').classList.toggle('show',t==='api');
+}
+
+function switchTab(t) {
+  activeTab = t;
+  document.getElementById('urlTab').style.display  = t==='url'  ? 'block':'none';
+  document.getElementById('htmlTab').style.display = t==='html' ? 'block':'none';
+  document.getElementById('zipTab').style.display  = t==='zip'  ? 'block':'none';
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>{
+    if(i===0) b.classList.toggle('active', t==='url');
+    else if(i===1) b.classList.toggle('active', t==='html');
+    else if(i===2) b.classList.toggle('active', t==='zip');
+  });
+}
+
+// API ad check checkboxes
+['apiChkR','apiChkI'].forEach(id => {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.addEventListener('click', () => {
+    const inp = el.querySelector('input');
+    inp.checked = !inp.checked;
+    el.classList.toggle('on', inp.checked);
+  });
+});
+
+// ── Permissions with search ──────────────────────────────────────────────
+// Updated with full list of 250+ permissions
+const PERMISSIONS_LIST = [
+  "android.permission.ACCEPT_HANDOVER",
+  "android.permission.ACCESS_BACKGROUND_LOCATION",
+  "android.permission.ACCESS_BLUETOOTH_SHARE",
+  "android.permission.ACCESS_CHECKIN_PROPERTIES",
+  "android.permission.ACCESS_COARSE_LOCATION",
+  "android.permission.ACCESS_FINE_LOCATION",
+  "android.permission.ACCESS_LOCATION_EXTRA_COMMANDS",
+  "android.permission.ACCESS_MEDIA_LOCATION",
+  "android.permission.ACCESS_NETWORK_STATE",
+  "android.permission.ACCESS_NOTIFICATION_POLICY",
+  "android.permission.ACCESS_WIFI_STATE",
+  "android.permission.ACCOUNT_MANAGER",
+  "android.permission.ACTIVITY_RECOGNITION",
+  "android.permission.ADD_VOICEMAIL",
+  "android.permission.ANSWER_PHONE_CALLS",
+  "android.permission.BATTERY_STATS",
+  "android.permission.BIND_ACCESSIBILITY_SERVICE",
+  "android.permission.BIND_AUTOFILL_SERVICE",
+  "android.permission.BIND_CALL_REDIRECTION_SERVICE",
+  "android.permission.BIND_CARRIER_MESSAGING_SERVICE",
+  "android.permission.BIND_CARRIER_SERVICES",
+  "android.permission.BIND_CHOOSER_TARGET_SERVICE",
+  "android.permission.BIND_COMPANION_DEVICE_SERVICE",
+  "android.permission.BIND_CONDITION_PROVIDER_SERVICE",
+  "android.permission.BIND_DEVICE_ADMIN",
+  "android.permission.BIND_DREAM_SERVICE",
+  "android.permission.BIND_INCALL_SERVICE",
+  "android.permission.BIND_INPUT_METHOD",
+  "android.permission.BIND_MIDI_DEVICE_SERVICE",
+  "android.permission.BIND_NFC_SERVICE",
+  "android.permission.BIND_NOTIFICATION_LISTENER_SERVICE",
+  "android.permission.BIND_PRINT_SERVICE",
+  "android.permission.BIND_QUICK_SETTINGS_TILE",
+  "android.permission.BIND_REMOTEVIEWS",
+  "android.permission.BIND_SCREENING_SERVICE",
+  "android.permission.BIND_TELECOM_CONNECTION_SERVICE",
+  "android.permission.BIND_TEXT_SERVICE",
+  "android.permission.BIND_TV_INPUT",
+  "android.permission.BIND_VOICE_INTERACTION",
+  "android.permission.BIND_VPN_SERVICE",
+  "android.permission.BIND_VR_LISTENER_SERVICE",
+  "android.permission.BIND_WALLPAPER",
+  "android.permission.BLUETOOTH",
+  "android.permission.BLUETOOTH_ADMIN",
+  "android.permission.BLUETOOTH_ADVERTISE",
+  "android.permission.BLUETOOTH_CONNECT",
+  "android.permission.BLUETOOTH_PRIVILEGED",
+  "android.permission.BLUETOOTH_SCAN",
+  "android.permission.BODY_SENSORS",
+  "android.permission.BODY_SENSORS_BACKGROUND",
+  "android.permission.BROADCAST_PACKAGE_REMOVED",
+  "android.permission.BROADCAST_SMS",
+  "android.permission.BROADCAST_STICKY",
+  "android.permission.BROADCAST_WAP_PUSH",
+  "android.permission.CALL_COMPANION_APP",
+  "android.permission.CALL_PHONE",
+  "android.permission.CALL_PRIVILEGED",
+  "android.permission.CAMERA",
+  "android.permission.CHANGE_COMPONENT_ENABLED_STATE",
+  "android.permission.CHANGE_CONFIGURATION",
+  "android.permission.CHANGE_NETWORK_STATE",
+  "android.permission.CHANGE_WIFI_MULTICAST_STATE",
+  "android.permission.CHANGE_WIFI_STATE",
+  "android.permission.CLEAR_APP_CACHE",
+  "android.permission.CONTROL_LOCATION_UPDATES",
+  "android.permission.DELETE_CACHE_FILES",
+  "android.permission.DELETE_PACKAGES",
+  "android.permission.DIAGNOSTIC",
+  "android.permission.DISABLE_KEYGUARD",
+  "android.permission.DUMP",
+  "android.permission.EXPAND_STATUS_BAR",
+  "android.permission.FACTORY_TEST",
+  "android.permission.FOREGROUND_SERVICE",
+  "android.permission.FOREGROUND_SERVICE_CAMERA",
+  "android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE",
+  "android.permission.FOREGROUND_SERVICE_DATA_SYNC",
+  "android.permission.FOREGROUND_SERVICE_HEALTH",
+  "android.permission.FOREGROUND_SERVICE_LOCATION",
+  "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK",
+  "android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION",
+  "android.permission.FOREGROUND_SERVICE_MICROPHONE",
+  "android.permission.FOREGROUND_SERVICE_PHONE_CALL",
+  "android.permission.FOREGROUND_SERVICE_REMOTE_MESSAGING",
+  "android.permission.GET_ACCOUNTS",
+  "android.permission.GET_ACCOUNTS_PRIVILEGED",
+  "android.permission.GET_PACKAGE_SIZE",
+  "android.permission.GET_TASKS",
+  "android.permission.GLOBAL_SEARCH",
+  "android.permission.HIDE_OVERLAY_WINDOWS",
+  "android.permission.HIGH_SAMPLING_RATE_SENSORS",
+  "android.permission.INSTALL_LOCATION_PROVIDER",
+  "android.permission.INSTALL_PACKAGES",
+  "android.permission.INSTALL_SHORTCUT",
+  "android.permission.INSTANT_APP_FOREGROUND_SERVICE",
+  "android.permission.INTERACTION_ACROSS_USERS",
+  "android.permission.INTERNET",
+  "android.permission.KILL_BACKGROUND_PROCESSES",
+  "android.permission.LAUNCH_CAPTURE_CONTENT_ACTIVITY_FOR_NOTE",
+  "android.permission.LOADER_USAGE_STATS",
+  "android.permission.MANAGE_DOCUMENTS",
+  "android.permission.MANAGE_EXTERNAL_STORAGE",
+  "android.permission.MANAGE_MEDIA",
+  "android.permission.MANAGE_ONGOING_CALLS",
+  "android.permission.MANAGE_OWN_CALLS",
+  "android.permission.MANAGE_WIFI_INTERFACES",
+  "android.permission.MANAGE_WIFI_NETWORK_SELECTION",
+  "android.permission.MASTER_CLEAR",
+  "android.permission.MEDIA_CONTENT_CONTROL",
+  "android.permission.MODIFY_AUDIO_SETTINGS",
+  "android.permission.MODIFY_PHONE_STATE",
+  "android.permission.MOUNT_FORMAT_FILESYSTEMS",
+  "android.permission.MOUNT_UNMOUNT_FILESYSTEMS",
+  "android.permission.NFC",
+  "android.permission.NFC_PREFERRED_PAYMENT_INFO",
+  "android.permission.NFC_TRANSACTION_EVENT",
+  "android.permission.OVERRIDE_WIFI_CONFIG",
+  "android.permission.PACKAGE_USAGE_STATS",
+  "android.permission.PERSISTENT_ACTIVITY",
+  "android.permission.POST_NOTIFICATIONS",
+  "android.permission.PROCESS_OUTGOING_CALLS",
+  "android.permission.QUERY_ALL_PACKAGES",
+  "android.permission.READ_BASIC_PHONE_STATE",
+  "android.permission.READ_CALENDAR",
+  "android.permission.READ_CALL_LOG",
+  "android.permission.READ_CONTACTS",
+  "android.permission.READ_EXTERNAL_STORAGE",
+  "android.permission.READ_FRAME_BUFFER",
+  "android.permission.READ_HISTORICAL_NETWORK_USAGE",
+  "android.permission.READ_INPUT_STATE",
+  "android.permission.READ_LOGS",
+  "android.permission.READ_MEDIA_AUDIO",
+  "android.permission.READ_MEDIA_IMAGES",
+  "android.permission.READ_MEDIA_VIDEO",
+  "android.permission.READ_MEDIA_VISUAL_USER_SELECTED",
+  "android.permission.READ_NEARBY_STREAMING_POLICY",
+  "android.permission.READ_PHONE_NUMBERS",
+  "android.permission.READ_PHONE_STATE",
+  "android.permission.READ_PRECISE_PHONE_STATE",
+  "android.permission.READ_PROFILE",
+  "android.permission.READ_SMS",
+  "android.permission.READ_SOCIAL_STREAM",
+  "android.permission.READ_SYNC_SETTINGS",
+  "android.permission.READ_SYNC_STATS",
+  "android.permission.READ_VOICEMAIL",
+  "android.permission.REBOOT",
+  "android.permission.RECEIVE_BOOT_COMPLETED",
+  "android.permission.RECEIVE_MMS",
+  "android.permission.RECEIVE_SMS",
+  "android.permission.RECEIVE_WAP_PUSH",
+  "android.permission.RECORD_AUDIO",
+  "android.permission.REORDER_TASKS",
+  "android.permission.REQUEST_COMPANION_PROFILE_APP_STREAMING",
+  "android.permission.REQUEST_COMPANION_PROFILE_AUTOMOTIVE_PROJECTION",
+  "android.permission.REQUEST_COMPANION_PROFILE_COMPUTER",
+  "android.permission.REQUEST_COMPANION_PROFILE_GLASSES",
+  "android.permission.REQUEST_COMPANION_PROFILE_WATCH",
+  "android.permission.REQUEST_COMPANION_RUN_IN_BACKGROUND",
+  "android.permission.REQUEST_COMPANION_START_FOREGROUND_SERVICES_FROM_BACKGROUND",
+  "android.permission.REQUEST_COMPANION_USE_DATA_IN_BACKGROUND",
+  "android.permission.REQUEST_DELETE_PACKAGES",
+  "android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS",
+  "android.permission.REQUEST_INSTALL_PACKAGES",
+  "android.permission.REQUEST_PASSWORD_COMPLEXITY",
+  "android.permission.RESTART_PACKAGES",
+  "android.permission.SCHEDULE_EXACT_ALARM",
+  "android.permission.SEND_RESPOND_VIA_MESSAGE",
+  "android.permission.SEND_SMS",
+  "android.permission.SET_ALARM",
+  "android.permission.SET_ALWAYS_FINISH",
+  "android.permission.SET_ANIMATION_SCALE",
+  "android.permission.SET_DEBUG_APP",
+  "android.permission.SET_PREFERRED_APPLICATIONS",
+  "android.permission.SET_PROCESS_LIMIT",
+  "android.permission.SET_TIME",
+  "android.permission.SET_TIME_ZONE",
+  "android.permission.SET_WALLPAPER",
+  "android.permission.SET_WALLPAPER_HINTS",
+  "android.permission.SIGNAL_PERSISTENT_PROCESSES",
+  "android.permission.SMS_FINANCIAL_TRANSACTIONS",
+  "android.permission.START_VIEW_PERMISSION_USAGE",
+  "android.permission.STATUS_BAR",
+  "android.permission.SYSTEM_ALERT_WINDOW",
+  "android.permission.TRANSMIT_IR",
+  "android.permission.UNINSTALL_SHORTCUT",
+  "android.permission.UPDATE_DEVICE_STATS",
+  "android.permission.USE_BIOMETRIC",
+  "android.permission.USE_EXACT_ALARM",
+  "android.permission.USE_FACIAL_RECOGNITION",
+  "android.permission.USE_FULL_SCREEN_INTENT",
+  "android.permission.USE_FINGERPRINT",
+  "android.permission.USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER",
+  "android.permission.USE_SIP",
+  "android.permission.UWB_RANGING",
+  "android.permission.VIBRATE",
+  "android.permission.WAKE_LOCK",
+  "android.permission.WRITE_APN_SETTINGS",
+  "android.permission.WRITE_CALENDAR",
+  "android.permission.WRITE_CALL_LOG",
+  "android.permission.WRITE_CONTACTS",
+  "android.permission.WRITE_EXTERNAL_STORAGE",
+  "android.permission.WRITE_GSERVICES",
+  "android.permission.WRITE_SECURE_SETTINGS",
+  "android.permission.WRITE_SETTINGS",
+  "android.permission.WRITE_SYNC_SETTINGS",
+  "android.permission.WRITE_VOICEMAIL"
+];
+
+let permissionCheckboxes = [];
+
+function buildPermissions() {
+  const container = document.getElementById('permissionsContainer');
+  container.innerHTML = '';
+  permissionCheckboxes = [];
+  PERMISSIONS_LIST.forEach(p => {
+    const label = document.createElement('label');
+    label.className = 'ad-check';
+    label.style.padding = '5px 8px';
+    label.dataset.perm = p;
+    label.innerHTML = `<input type="checkbox" value="${p}"/><div class="dot"></div><span style="font-size:0.7rem;">${p}</span>`;
+    label.addEventListener('click', () => {
+      const inp = label.querySelector('input');
+      inp.checked = !inp.checked;
+      label.classList.toggle('on', inp.checked);
+    });
+    container.appendChild(label);
+    permissionCheckboxes.push(label);
+  });
+}
+
+function filterPermissions() {
+  const query = document.getElementById('permSearch').value.toLowerCase();
+  permissionCheckboxes.forEach(label => {
+    const text = label.textContent.toLowerCase();
+    label.style.display = text.includes(query) ? '' : 'none';
+  });
+}
+
+buildPermissions();
+
+// ── Zip handler ────────────────────────────────────────────────────────
+function handleZip(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const base64 = e.target.result.split(',')[1];
+    zipBase64 = base64;
+  };
+  reader.readAsDataURL(file);
+}
+
+// ── Package name check ────────────────────────────────────────────────────
+let pkgTimer;
+function checkPkg(inp) {
+  clearTimeout(pkgTimer);
+  pkgTimer = setTimeout(async () => {
+    const v = inp.value.trim();
+    if (!v) { inp.className=''; document.getElementById('pkgStatus').textContent=''; return; }
+    const r = await fetch('/check-package?pkg='+encodeURIComponent(v));
+    const d = await r.json();
+    inp.className = d.valid ? 'valid' : 'invalid';
+    document.getElementById('pkgStatus').innerHTML = d.valid
+      ? '<span style="color:var(--green)">✓ Valid</span>'
+      : '<span style="color:var(--red)">✗ Invalid</span>';
+  }, 400);
+}
+
+function getBuilderAdTypes() {
+  return [...document.querySelectorAll('#adTypesRow .ad-check input')]
+    .filter(i=>i.checked).map(i=>i.value);
+}
+
+function getSelectedPermissions() {
+  const checked = [...document.querySelectorAll('#permissionsContainer input:checked')].map(i => i.value);
+  const custom = document.getElementById('customPerms').value.split(',').map(s => s.trim()).filter(s => s);
+  return [...checked, ...custom];
+}
+
+// ── APK Build ─────────────────────────────────────────────────────────────
+async function startBuild() {
+  const appName = document.getElementById('appName').value.trim();
+  const pkg     = document.getElementById('pkgName').value.trim();
+  const adId    = document.getElementById('adId').value.trim();
+  const adTypes = getBuilderAdTypes();
+  const autoS   = document.getElementById('autoShow').checked;
+  const testM   = document.getElementById('testMode')?.checked || false;
+  const iconUrl = document.getElementById('iconUrl').value.trim();
+  const contentType = activeTab;
+  let contentValue = '';
+  let zipBase64Data = '';
+  let entryFile = 'index.html';
+  if (contentType === 'url') {
+    contentValue = document.getElementById('urlInput').value.trim();
+  } else if (contentType === 'html') {
+    contentValue = document.getElementById('htmlInput').value.trim();
+  } else if (contentType === 'zip') {
+    zipBase64Data = zipBase64;
+    entryFile = document.getElementById('entryFile').value.trim() || 'index.html';
+    contentValue = ''; // not used
+  }
+
+  const perms = getSelectedPermissions();
+  const rewardedPlacement = document.getElementById('rewardedPlacement').value.trim();
+
+  if (!appName||!pkg||!adId) {
+    return showBuildResult('err','❌ Fields missing','App Name, Package, ID required!');
+  }
+  if (contentType === 'url' && !contentValue) {
+    return showBuildResult('err','❌ URL required','Website URL dalo');
+  }
+  if (contentType === 'html' && !contentValue) {
+    return showBuildResult('err','❌ HTML required','HTML content dalo');
+  }
+  if (contentType === 'zip' && !zipBase64Data) {
+    return showBuildResult('err','❌ ZIP required','ZIP file upload karo');
+  }
+  if (!adTypes.length) {
+    return showBuildResult('err','❌ Ad type select karo','Kam se kam ek ad type select karo');
+  }
+
+  const btn = document.getElementById('buildBtn');
+  btn.disabled = true; btn.textContent = '⏳ Building...';
+  document.getElementById('buildProgress').style.display='block';
+  document.getElementById('buildResult').innerHTML='';
+  buildCommitSha = null;
+
+  const steps = [
+    [12,'📝 Project files generate ho rahe hain...'],
+    [28,'☕ MainActivity.java likh raha hai...'],
+    [48,'🔧 SDK + Gradle configure ho raha hai...'],
+    [65,'🔄 GitHub Workflow set ho raha hai...'],
+    [82,'🚀 GitHub pe push ho raha hai...'],
+  ];
+  let si=0;
+  const iv = setInterval(()=>{
+    if(si<steps.length){
+      document.getElementById('bProg').style.width=steps[si][0]+'%';
+      document.getElementById('bLabel').textContent=steps[si][1];
+      si++;
+    }
+  },900);
+
+  try {
+    const payload = {
+      app_name: appName,
+      package_name: pkg,
+      network: selectedNetwork,
+      ad_id: adId,
+      content_type: contentType,
+      content_value: contentValue,
+      ad_types: adTypes,
+      auto_show: autoS,
+      test_mode: testM,
+      icon_url: iconUrl,
+      permissions: perms,
+      rewarded_placement: rewardedPlacement,
+      entry_file: entryFile,
+      zip_base64: zipBase64Data
+    };
+    const res = await fetch('/build',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(payload)
+    });
+    clearInterval(iv);
+    const data = await res.json();
+
+    if(data.success){
+      document.getElementById('bProg').style.width='100%';
+      document.getElementById('bLabel').textContent='✅ Push ho gaya!';
+      buildCommitSha = data.commit_sha;
+      showBuildResult('ok', '🎉 GitHub pe Push Ho Gaya!',
+        'GitHub Actions ab APK build kar raha hai — 2-5 min mein taiyar hoga.',
+        data.actions_url, data.repo_url, data.snippets, data.commit_sha);
+      startPolling(data.commit_sha);
+    } else {
+      document.getElementById('bProg').style.width='0%';
+      document.getElementById('bLabel').textContent='';
+      showBuildResult('err','❌ Error',data.error||'Unknown error');
+    }
+  } catch(e) {
+    clearInterval(iv);
+    showBuildResult('err','❌ Network Error',e.message);
+  }
+  btn.disabled=false; btn.textContent='⚡ Build APK — GitHub pe Push Karo';
+}
+
+// ── Live build tracker ────────────────────────────────────────────────────
+function startPolling(sha) {
+  clearInterval(pollInterval);
+  let runId = null;
+  let attempts = 0;
+  pollInterval = setInterval(async () => {
+    attempts++;
+    if (attempts > 60) { clearInterval(pollInterval); return; }
+    try {
+      if (!runId) {
+        const r = await fetch('/find-run/' + sha);
+        const d = await r.json();
+        if (d.found) runId = d.run_id;
+        else return;
+      }
+      const r2 = await fetch('/run-status/' + runId);
+      const d2 = await r2.json();
+      updateTracker(d2.status, d2.conclusion, runId);
+      if (d2.status === 'completed') clearInterval(pollInterval);
+    } catch(e){}
+  }, 5000);
+}
+
+function updateTracker(status, conclusion, runId) {
+  const el = document.getElementById('buildTracker');
+  if (!el) return;
+  const steps = ['queued','in_progress','completed'];
+  const idx   = steps.indexOf(status);
+  steps.forEach((s,i) => {
+    const dot = el.querySelector('.t-dot[data-step="'+i+'"]');
+    if (!dot) return;
+    if (i < idx) { dot.className='t-dot done'; dot.textContent='✓'; }
+    else if (i === idx) {
+      if (s==='completed') {
+        if (conclusion==='success') { dot.className='t-dot done'; dot.textContent='✓'; }
+        else                        { dot.className='t-dot fail'; dot.textContent='✗'; }
+      } else { dot.className='t-dot active'; dot.textContent=i+1; }
+    } else { dot.className='t-dot'; dot.textContent=i+1; }
+  });
+  if (status==='completed' && conclusion==='success') {
+    const dlBtn = document.getElementById('dlBtn');
+    if (dlBtn && runId) {
+      dlBtn.href='/download/'+runId;
+      dlBtn.style.display='inline-block';
+      dlBtn.textContent='📱 APK Download Karo!';
+    }
+    const trackerMsg = document.getElementById('trackerMsg');
+    if (trackerMsg) trackerMsg.innerHTML='<span style="color:var(--green)">✅ APK ready hai! Upar wala button dabao.</span>';
+  } else if (status==='completed') {
+    const trackerMsg = document.getElementById('trackerMsg');
+    if (trackerMsg) trackerMsg.innerHTML='<span style="color:var(--red)">❌ Build fail hua — Actions page check karo.</span>';
+  }
+}
+
+function showBuildResult(type, title, sub, actUrl, repoUrl, snippets, sha) {
+  let trackerHtml = '';
+  if (type==='ok') {
+    trackerHtml = `
+    <div style="margin-top:14px">
+      <div class="tracker" id="buildTracker">
+        <div class="tracker-step"><div class="t-dot active" data-step="0">1</div><div class="t-label">Queued</div></div>
+        <div class="tracker-step"><div class="t-dot" data-step="1">2</div><div class="t-label">Building</div></div>
+        <div class="tracker-step"><div class="t-dot" data-step="2">3</div><div class="t-label">Done</div></div>
+      </div>
+      <div id="trackerMsg" style="font-size:.76rem;color:var(--muted);text-align:center;margin-top:8px">
+        Build chalu hai… (~2-5 min)
+      </div>
+      <div class="btns-row" style="margin-top:12px">
+        <a id="dlBtn" class="btn-sm" style="background:var(--green);display:none" href="#">📱 APK Download Karo!</a>
+        <a class="btn-sm" style="background:var(--accent)" href="${actUrl}" target="_blank">👁 Actions Dekho</a>
+        <a class="btn-sm" style="background:var(--s3);color:var(--text)" href="${repoUrl}" target="_blank">📂 Repo</a>
+      </div>
+    </div>`;
+  }
+
+  let snippetHtml = '';
+  if (snippets) {
+    const parts = [];
+    if (snippets.rewarded_btn)     parts.push(snippets.rewarded_btn);
+    if (snippets.interstitial_btn) parts.push(snippets.interstitial_btn);
+    const combined = parts.join('\n');
+    if (combined) {
+      snippetHtml = `
+      <div class="card" style="margin-top:12px">
+        <div class="ct" style="color:var(--a3)">🔗 Ad Button Code — Apni HTML mein Paste Karo</div>
+        <div class="info" style="margin-bottom:8px">
+          <strong>Custom HTML walon ke liye:</strong> Ye buttons apni HTML mein kahi bhi paste karo.
+          Click karte hi ad turant show hoga — app ka koi alag button nahi hoga!
+        </div>
+        <div class="code-block">${escHtml(combined)}</div>
+        <button class="copy-btn" onclick="copy(${JSON.stringify(combined)},this)">📋 Copy Buttons Code</button>
+        <div class="divider" style="margin-top:12px"></div>
+        <div style="font-size:.73rem;color:var(--muted);margin-top:8px">
+          <strong style="color:var(--text)">JS Bridge bhi available hai:</strong><br/>
+          <code>${snippets.js_rewarded}</code> — Rewarded<br/>
+          <code>${snippets.js_interstitial}</code> — Interstitial
+        </div>
+      </div>`;
+    }
+  }
+
+  const html = `
+  <div class="result-box ${type}">
+    <div class="ri">${type==='ok'?'✅':'❌'}</div>
+    <div class="rt">
+      <div class="rtt">${title}</div>
+      <div class="rts">${sub}</div>
+      ${trackerHtml}
+    </div>
+  </div>
+  ${snippetHtml}`;
+
+  document.getElementById('buildResult').innerHTML = html;
+  document.getElementById('buildResult').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+// ── Custom Ad API ─────────────────────────────────────────────────────────
+async function generateAPI() {
+  const gameId  = document.getElementById('apiGameId').value.trim();
+  const adTypes = [...document.querySelectorAll('#apiChkR input,#apiChkI input')]
+    .filter(i=>i.checked).map(i=>i.value);
+
+  if (!gameId)       return showApiResult('err','❌ Ad Network ID required','');
+  if (!adTypes.length) return showApiResult('err','❌ Ad type select karo','');
+
+  const btn = document.getElementById('genBtn');
+  btn.disabled=true; btn.textContent='⏳ Generating...';
+
+  try {
+    const res = await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({game_id:gameId,network:selectedNetwork,ad_types:adTypes})});
+    const data = await res.json();
+    if (data.success) showApiResult('ok','✅ API Ready!','',data);
+    else showApiResult('err','❌ Error',data.error||'Unknown');
+  } catch(e) { showApiResult('err','❌ Network Error',e.message); }
+
+  btn.disabled=false; btn.textContent='🔑 Generate API Key + Code';
+}
+
+function showApiResult(type, title, sub, data) {
+  if (type !== 'ok') {
+    document.getElementById('apiResult').innerHTML =
+      `<div class="result-box err" style="margin-top:12px">
+        <div class="ri">❌</div><div class="rt"><div class="rtt">${title}</div><div class="rts">${sub}</div></div>
+      </div>`;
+    return;
+  }
+
+  const html = `
+  <div class="result-box ok" style="margin-top:14px">
+    <div class="ri">✅</div>
+    <div class="rt"><div class="rtt">API Generated!</div>
+      <div class="rts">Network: ${data.network} | ID: ${data.game_id}</div></div>
+  </div>
+
+  <div class="card" style="margin-top:12px">
+    <div class="ct ct-cyan">🔑 API Key</div>
+    <div class="code-block">${data.api_key}</div>
+    <button class="copy-btn" onclick="copy('${data.api_key}',this)">📋 Copy</button>
+  </div>
+
+  <div class="card">
+    <div class="ct ct-cyan">💻 JS Code — Kisi bhi Button pe Laga do</div>
+    <div class="info" style="margin-bottom:8px;font-size:.78rem">
+      Ye code apni HTML ke <code>&lt;head&gt;</code> ya <code>&lt;body&gt;</code> mein paste karo.
+      Phir kisi bhi button pe <code>onclick="showAd('rewarded')"</code> laga do.
+    </div>
+    <div class="code-block">${escHtml(data.js_snippet)}</div>
+    <button class="copy-btn" onclick="copy(${JSON.stringify(data.js_snippet)},this)">📋 Copy JS Code</button>
+  </div>
+
+  <div class="card">
+    <div class="ct ct-cyan">🔗 URL Bridge — Bina JS ke</div>
+    <div class="code-block">${escHtml(data.url_snippet)}</div>
+    <button class="copy-btn" onclick="copy(${JSON.stringify(data.url_snippet)},this)">📋 Copy URL Code</button>
+  </div>
+
+  <div class="card">
+    <div class="ct ct-cyan">📄 Test HTML — Poora page copy karo</div>
+    <div class="code-block">${escHtml(data.test_html)}</div>
+    <button class="copy-btn" onclick="copy(${JSON.stringify(data.test_html)},this)">📋 Copy Full HTML</button>
+  </div>`;
+
+  document.getElementById('apiResult').innerHTML = html;
+  document.getElementById('apiResult').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────
+function escHtml(s){
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function copy(text, btn) {
+  navigator.clipboard.writeText(text).then(()=>{
+    const o=btn.textContent; btn.textContent='✅ Copied!';
+    setTimeout(()=>btn.textContent=o,2000);
+  });
+}
+</script>
+</body>
+</html>
