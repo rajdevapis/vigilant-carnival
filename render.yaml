@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: apk-builder
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    envVars:
+      - key: GITHUB_TOKEN
+        sync: false
+      - key: GITHUB_OWNER
+        sync: false
+      - key: GITHUB_REPO
+        value: apk-builds
+    healthCheckPath: /
+    autoDeploy: true
